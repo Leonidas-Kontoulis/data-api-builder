@@ -2,7 +2,8 @@
 <html>
 <head>
   <title>Azure Blob Storage File Upload</title>
-  <script src="https://cdn.jsdelivr.net/npm/@azure/storage-blob@12.28.0/browser/azure-storage-blob.min.js"></script>
+  <!-- Add type="text/javascript" just in case -->
+  <script src="https://cdn.jsdelivr.net/npm/@azure/storage-blob@12.28.0/browser/azure-storage-blob.min.js" type="text/javascript"></script>
 </head>
 <body>
   <h2>Upload File to Azure Blob Storage</h2>
@@ -12,11 +13,12 @@
 
   <script>
     async function uploadFile() {
-      const sasUrl = "https://managerfiles.blob.core.windows.net/uploads?sp=racwl&st=2025-10-15T13:02:29Z&se=2025-10-25T22:17:29Z&sv=2024-11-04&sr=c&sig=8rzaF5aWVBl6Dv8thEFhFtDHRWcNBGOfwIB4KSHZEp0%3D"; // Replace this with your SAS URL
-
+      const sasUrl = "https://managerfiles.blob.core.windows.net/uploads?sp=racwl&st=2025-10-15T13:02:29Z&se=2025-10-25T22:17:29Z&sv=2024-11-04&sr=c&sig=8rzaF5aWVBl6Dv8thEFhFtDHRWcNBGOfwIB4KSHZEp0%3D";
       try {
-        const blobServiceClient = new AzureStorageBlob.BlobServiceClient(sasUrl);
-        const containerClient = blobServiceClient.getContainerClient("");
+        // Use the correct global variable (azblob)
+        const blobServiceClient = new azblob.BlobServiceClient(sasUrl);
+        // Provide the container name "uploads"
+        const containerClient = blobServiceClient.getContainerClient("uploads");
 
         const fileInput = document.getElementById("fileInput");
         if (fileInput.files.length === 0) {
