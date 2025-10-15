@@ -1,43 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Azure Blob Storage File Upload</title>
-
+    <title>Upload to Azure Blob Storage with Fixed SAS</title>
 </head>
 <body>
-    <!-- Add type="text/javascript" just in case -->
-  <script src="https://cdn.jsdelivr.net/npm/@azure/storage-blob@12.28.0/browser/azure-storage-blob.min.js" type="text/javascript"></script>
-  
-  
-  <h2>Upload File to Azure Blob Storage</h2>
-  <input type="file" id="fileInput" />
-  <button onclick="uploadFile()">Upload</button>
-  <p id="status"></p>
+    <h1>Select and Upload File to Azure Blob Storage</h1>
+    <input type="file" id="fileInput" />
+    <button onclick="uploadFile()">Upload</button>
 
-  <script>
-    async function uploadFile() {
-      const sasUrl = "https://managerfiles.blob.core.windows.net/uploads?sp=racwl&st=2025-10-15T13:02:29Z&se=2025-10-25T22:17:29Z&sv=2024-11-04&sr=c&sig=8rzaF5aWVBl6Dv8thEFhFtDHRWcNBGOfwIB4KSHZEp0%3D";
-      try {
-        // Use the correct global variable (azblob)
-        const blobServiceClient = new azblob.BlobServiceClient(sasUrl);
-        // Provide the container name "uploads"
-        const containerClient = blobServiceClient.getContainerClient("uploads");
+    <script>
+        // Replace with your fixed SAS URL pointing to the container (ensure trailing slash)
+        const fixedSasUrl = 'https://managerfiles.blob.core.windows.net/uploads?sp=racwl&st=2025-10-15T13:02:29Z&se=2025-10-25T22:17:29Z&sv=2024-11-04&sr=c&sig=8rzaF5aWVBl6Dv8thEFhFtDHRWcNBGOfwIB4KSHZEp0%3D';
 
-        const fileInput = document.getElementById("fileInput");
-        if (fileInput.files.length === 0) {
-          alert("Please select a file to upload.");
-          return;
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) {
+                alert('Please select a file first.');
+                return;
+            }
+            const file = fileInput.files[0];
+
+            // Construct full URL with filename appended to container SAS URL
+            const uploadUrl = fixedSasUrl.endsWith('/') ? fixedSasUrl + encodeURIComponent(file.name) : fixedSasUrl + '/' + encodeURIComponent(file.name);
+
+            const uploadResponse = await fetch(uploadUrl, {
+                method: 'PUT',
+                headers: {
+                    'x-ms-blob-type': 'BlockBlob'
+                },
+                body: file
+            });
+
+            if (uploadResponse.ok) {
+                alert('File uploaded successfully!');
+            } else {
+                alert('File upload failed.');
+                console.error(await uploadResponse.text());
+            }
         }
-        const file = fileInput.files[0];
-        const blockBlobClient = containerClient.getBlockBlobClient(file.name);
-
-        document.getElementById("status").innerText = "Uploading...";
-        await blockBlobClient.uploadBrowserData(file);
-        document.getElementById("status").innerText = "Upload successful!";
-      } catch (error) {
-        document.getElementById("status").innerText = "Upload failed: " + error.message;
-      }
-    }
-  </script>
+    </script>
 </body>
 </html>
