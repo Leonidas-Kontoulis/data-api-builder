@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Azure Blob Upload</title>
+  <script src="https://cdn.jsdelivr.net/npm/@azure/storage-blob@12.15.0/browser/azure-storage-blob.min.js"></script>
+</head>
+<body>
+
+  <h2>Upload File to Azure Blob Storage</h2>
+  
+  <input type="file" id="fileInput" />
+  <button onclick="uploadFile()">Upload</button>
+  
+  <p id="status"></p>
+  
+  <script>
+    async function uploadFile() {
+      const sasUrl = "https://managerfiles.blob.core.windows.net/uploads?sp=racwl&st=2025-10-15T13:02:29Z&se=2025-10-25T22:17:29Z&sv=2024-11-04&sr=c&sig=8rzaF5aWVBl6Dv8thEFhFtDHRWcNBGOfwIB4KSHZEp0%3D";
+      
+      // Get file from input
+      const fileInput = document.getElementById("fileInput");
+      if (fileInput.files.length === 0) {
+        alert("Please select a file first");
+        return;
+      }
+      const file = fileInput.files[0];
+      
+      const { BlobServiceClient } = azureStorageBlob;
+      const blobServiceClient = new BlobServiceClient(sasUrl);
+      const containerClient = blobServiceClient.getContainerClient("");
+      const blockBlobClient = containerClient.getBlockBlobClient(file.name);
+      
+      try {
+        document.getElementById("status").innerText = "Uploading...";
+        await blockBlobClient.uploadBrowserData(file);
+        document.getElementById("status").innerText = "Upload successful!";
+      } catch (err) {
+        document.getElementById("status").innerText = "Upload failed: " + err.message;
+      }
+    }
+  </script>
+
+</body>
+</html>
